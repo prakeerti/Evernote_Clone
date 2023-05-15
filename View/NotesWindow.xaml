@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Evernote_Clone.View"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         xmlns:vm="clr-namespace:Evernote_Clone.ViewModel"
         xmlns:uc="clr-namespace:Evernote_Clone.View.UserControls"
@@ -38,7 +39,25 @@
                       ItemsSource="{Binding Notebooks}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <uc:NotebookDisplay Notebook="{Binding}" />
+                        <Grid>
+                            <uc:NotebookDisplay Notebook="{Binding}">
+                                <uc:NotebookDisplay.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Rename"
+                                              Command="{Binding Source={StaticResource vm},Path=RenameCommand}" />
+                                    </ContextMenu>
+                                </uc:NotebookDisplay.ContextMenu>
+                            </uc:NotebookDisplay>
+                            <TextBox Text="{Binding Name}"
+                                Visibility="{Binding Source={StaticResource vm}, Path=IsVisible}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="LostFocus">
+                                        <i:InvokeCommandAction Command="{Binding Source={StaticResource vm}, Path=EndEditingCommand}"
+                                                               CommandParameter="{Binding}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
                 
