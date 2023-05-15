@@ -1,0 +1,90 @@
+﻿<Window x:Class="Evernote_Clone.View.NotesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Evernote_Clone.View"
+        mc:Ignorable="d"
+        xmlns:vm="clr-namespace:Evernote_Clone.ViewModel"
+        Title="NotesWindow" Height="300" Width="600">
+    <Window.Resources>
+        <vm:NotesVM x:Key="vm" />
+    </Window.Resources>
+    <Grid>
+        <DockPanel DataContext="{StaticResource vm}">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="File">
+                    <MenuItem Header="New Notebook"
+                              Command="{Binding NewNotebookCommand}"/>
+                    <MenuItem Header="New Note"
+                              Command="{Binding NewNoteCommand}"
+                              CommandParameter="{Binding SelectedNotebook}"/>
+                    <Separator/>
+                    <MenuItem Header="Exit"
+                              Click="MenuItem_Click"/>
+                </MenuItem>
+            </Menu>
+            <StatusBar DockPanel.Dock="Bottom">
+                <StatusBarItem>
+                    <TextBlock x:Name="statusTextBlock" />
+                </StatusBarItem>
+            </StatusBar>
+            
+            <ListView DockPanel.Dock="Left"
+                      Width="140"
+                      SelectedValue="{Binding SelectedNotebook,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      ItemsSource="{Binding Notebooks}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                
+            </ListView >
+            <ListView DockPanel.Dock="Left"
+                      Width="140"
+                      ItemsSource="{Binding Notes}" >
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Title}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <ToolBarTray DockPanel.Dock="Top">
+                <ToolBar>
+                    <Button Content="Speech"
+                            Click="SpeechButton_Click"/>
+                    <ToggleButton x:Name="boldButton"
+                                  Content="B"
+                                  Click="boldButton_Click"
+                                  FontWeight="Bold" />
+                    <ToggleButton Content="I"
+                                  x:Name="italicButton"
+                                  Click="italicButton_Click"
+                                  FontStyle="Italic"
+                                  FontWeight="DemiBold"/>
+                    <ToggleButton x:Name="underlineButton"
+                                  Click="underlineButton_Click">
+                        <TextBlock Text="U"
+                                   FontWeight="Bold"
+                                   TextDecorations="Underline"/>
+                    </ToggleButton>
+                    <ComboBox x:Name="fontFamily_Combobox"
+                              Width="100"
+                              SelectionChanged="fontFamilyCombobox_SelectionChanged" />
+                    <ComboBox x:Name="fontSize_Combobox"
+                              Width="50"
+                              IsEditable="True"
+                              TextBoxBase.TextChanged="fontSizeCombobox_SelectionChanged" />
+                </ToolBar>
+            </ToolBarTray>
+            <Grid>
+                <RichTextBox x:Name="ContentRichTextbox"
+                             TextChanged="richTextbox_TextcChanged"
+                             SelectionChanged="richTextBox_SelectionChanged"/>
+            </Grid>
+        </DockPanel>
+        
+    </Grid>
+</Window>
