@@ -15,6 +15,9 @@ using System.Speech;
 using System.Speech.Recognition;
 using System.Threading;
 using System.Windows.Controls.Primitives;
+using Evernote_Clone.ViewModel;
+using Evernote_Clone.ViewModel.Helper;
+using System.IO;
 
 namespace Evernote_Clone.View
 {
@@ -24,9 +27,16 @@ namespace Evernote_Clone.View
     public partial class NotesWindow : Window
     {
         SpeechRecognitionEngine recognizer;
+        NotesVM viewModel;
         public NotesWindow()
         {
             InitializeComponent();
+            //rather that creating an instance of NotesVM inside the xaml file we can do it in this code and use that to make the running of save button work 
+            //when we will have the view model already the event handler for save button will auto matically know what the selected note is 
+
+            viewModel = Resources["vm"] as NotesVM;
+            viewModel.SelectedNoteChanged += ViewModel_SelectedNoteChanged;
+
             var currentCulture = (from r in SpeechRecognitionEngine.InstalledRecognizers()
                                  where r.Culture.Equals(Thread.CurrentThread.CurrentCulture)
                                  select r).FirstOrDefault();
@@ -46,6 +56,22 @@ namespace Evernote_Clone.View
             List<double> fontSizes= new List<double>() { 7,8,9,11,14,6,18,22,24,28,32,36,40,44,52,64,72};
             fontSize_Combobox.ItemsSource = fontSizes;
 
+        }
+
+        private void ViewModel_SelectedNoteChanged(object? sender, EventArgs e)
+        {
+            ContentRichTextbox.Document.Blocks.Clear();
+            if (viewModel.SelectedNote != null)
+            {
+                //first it has to check if the file path is empty or not. if it is not then we can perform the same file stream and this time open the file 
+                if (!string.IsNullOrEmpty(viewModel.SelectedNote.FileLocation))
+                {
+                    FileStream fileStream = new FileStream(viewModel.SelectedNote.FileLocation, FileMode.Open);
+                    var contents = new TextRange(ContentRichTextbox.Document.ContentStart, ContentRichTextbox.Document.ContentEnd);
+                    contents.Load(fileStream, DataFormats.Rtf);
+
+                }
+            } 
         }
 
         public void Recognizer_SpeechRecognized(object sender,SpeechRecognizedEventArgs e)
@@ -171,6 +197,25 @@ namespace Evernote_Clone.View
             fontSize_Combobox.Text = ContentRichTextbox.Selection.GetPropertyValue(Inline.FontSizeProperty).ToString();
         }
 
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            //rtf file= real text format file 
+            //we will create a file that will append these changes and all
+            string rtfFile = System.IO.Path.Combine(Environment.CurrentDirectory, $"{viewModel.SelectedNote.Id}.rtf");
+            //this rtfile variable has the path to the file where out notes will be saved 
+            //once we have the file we can go and update the model this file willbe using the file location so we need to update that too 
+            viewModel.SelectedNote.FileLocation = rtfFile; //update this in db now 
+            DatabaseHelper.Update(viewModel.SelectedNote); //this will update the note file and the its location in the db 
+
+            //till now we are only telling the model that the db has been updated, next is to save the file 
+
+            FileStream fileStream = new FileStream(rtfFile, FileMode.Create);
+            //this means that whenever we are updating this will create a new file with updation and replace it with the older file 
+            var contents= new TextRange(ContentRichTextbox.Document.ContentStart, ContentRichTextbox.Document.ContentEnd);
+            //now we have the content for the file, using this contents call the save method(this requires the srteam where all our file content is stored
+            contents.Save(fileStream, DataFormats.Rtf);
+
+        }
     }
 }
     

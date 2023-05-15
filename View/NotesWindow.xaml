@@ -10,7 +10,9 @@
         xmlns:uc="clr-namespace:Evernote_Clone.View.UserControls"
         Title="NotesWindow" Height="300" Width="600">
     <Window.Resources>
-        <vm:NotesVM x:Key="vm" />
+        <ResourceDictionary>
+            <vm:NotesVM x:Key="vm" />
+        </ResourceDictionary>
     </Window.Resources>
     <Grid>
         <DockPanel DataContext="{StaticResource vm}">
@@ -64,6 +66,7 @@
             </ListView >
             <ListView DockPanel.Dock="Left"
                       Width="150"
+                      SelectedValue="{Binding SelectedNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                       ItemsSource="{Binding Notes}" >
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -98,6 +101,9 @@
                               Width="50"
                               IsEditable="True"
                               TextBoxBase.TextChanged="fontSizeCombobox_SelectionChanged" />
+                    <Button x:Name="saveButton"
+                            Content="Save"
+                            Click="SaveButton_Click" />
                 </ToolBar>
             </ToolBarTray>
             <Grid>

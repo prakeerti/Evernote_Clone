@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace Evernote_Clone.ViewModel
 {
     public class NotesVM:INotifyPropertyChanged
     {
+		
         public ObservableCollection<Notebook> Notebooks { get; set; }
 
         public ObservableCollection<Note> Notes { get; set; }
@@ -38,10 +40,28 @@ namespace Evernote_Clone.ViewModel
 			}
 		}
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+		private Note selectedNote;
+
+		public Note SelectedNote
+		{
+			get { return selectedNote; }
+			set 
+			{ 
+				selectedNote = value;
+				OnPropertyChanged("SelectedNote"); //we have to bind this property to the list view of the note
+				SelectedNoteChanged?.Invoke(this, new EventArgs()); //we will react to this event from the notes window xaml.cs file 
+			}
+		}
+
+
+		public event PropertyChangedEventHandler? PropertyChanged;
+		//we have to view content inside a note and we can do it using the setter of selected note, however we donot have access to the content rich text box through view model. 
+		public event EventHandler SelectedNoteChanged; //we juts have to invoke this event from the setter of the selected note 
+
 
         public NotesVM()
         {
+
 			NewNotebookCommand = new NewNotebookCommand(this);
 			NewNoteCommand = new NewNoteCommand(this);
 			RenameCommand= new RenameCommand(this);
